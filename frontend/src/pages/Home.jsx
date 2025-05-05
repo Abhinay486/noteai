@@ -141,7 +141,7 @@ const Home = () => {
   
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/${user._id}/newnote`,
+        `${import.meta.env.VITE_API_URL}/api/user/${user._id}/newnote`,
         { title, content },
         {
           withCredentials: true,
@@ -159,7 +159,7 @@ const Home = () => {
   const handleDelete = async (noteId) => {
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/${user._id}/delete/${noteId}`,
+        `${import.meta.env.VITE_API_URL}/api/user/${user._id}/note/${noteId}`,
         {
           withCredentials: true,
         }
@@ -200,7 +200,7 @@ const Home = () => {
   
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/${user._id}/updatepin/${editingNote._id}`,
+        `${import.meta.env.VITE_API_URL}/api/user/${user._id}/note/${editingNote._id}`,
         { title, content },
         {
           withCredentials: true,
