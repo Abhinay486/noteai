@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
-import noteRoutes from "./routes/noteRoutes.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,7 +26,6 @@ app.use(cors({
 
 // API Routes
 app.use("/api", userRoutes);
-app.use("/api", noteRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
