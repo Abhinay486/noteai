@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 const Navbar = ({ user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const userInitial = user && user.name ? user.name[0].toUpperCase() : "?";
+  const userInitial = user?.name ? user.name[0].toUpperCase() : "?";
   const navigate = useNavigate();
   const { setIsAuth, setUser } = UserData();
 
@@ -30,21 +30,26 @@ const Navbar = ({ user }) => {
 
   const logOutHand = async () => {
     const token = localStorage.getItem('token');
+    if (!token) {
+      setIsAuth(false);
+      setUser(null);
+      navigate("/login");
+      return;
+    }
+
     try {
-      await axios.get("http://localhost:5000/api/logout", {
+      await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Continue with logout even if the server request fails
+    } finally {
       localStorage.removeItem('token');
       setIsAuth(false);
       setUser(null);
       toast.success("Logged out successfully");
-      navigate("/login");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Logout failed");
-      localStorage.removeItem('token');
-      setIsAuth(false);
-      setUser(null);
       navigate("/login");
     }
   };

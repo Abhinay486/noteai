@@ -17,16 +17,36 @@ export const UserProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
-            const { data } = await axios.get("http://localhost:5000/api/me", {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log("No token found");
+                setIsAuth(false);
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            console.log("Fetching user data with token:", token.substring(0, 10) + "...");
+            
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/me`, {
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
                 withCredentials: true
             });
+            
+            console.log("User data received:", data);
+            
             if (data && data.user) {
                 setUser(data.user);
                 setIsAuth(true);
+                console.log("User authenticated:", data.user.name);
             } else {
                 console.error("Invalid user data received:", data);
                 setIsAuth(false);
                 setUser(null);
+                toast.error("Session expired. Please login again.");
             }
         } catch (error) {
             console.error("Fetch user error:", {
@@ -36,6 +56,10 @@ export const UserProvider = ({ children }) => {
             });
             setIsAuth(false);
             setUser(null);
+            if (error.response?.status === 401) {
+                toast.error("Session expired. Please login again.");
+                localStorage.removeItem('token');
+            }
         } finally {
             setLoading(false);
         }
@@ -44,13 +68,19 @@ export const UserProvider = ({ children }) => {
     const registerUser = async (name, email, password, navigate) => {
         setBtnLoading(true);
         try {
-            const { data } = await axios.post("http://localhost:5000/api/register", 
+            const { data } = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/register`, 
                 { name, email, password },
-                { withCredentials: true }
+                { 
+                    withCredentials: true,
+                    headers: { 'Content-Type': 'application/json' }
+                }
             );
+            
             if (data && data.user) {
                 setUser(data.user);
                 setIsAuth(true);
+                localStorage.setItem("token", data.token);
                 toast.success("Registration Successful");
                 navigate("/");
             } else {
@@ -67,15 +97,21 @@ export const UserProvider = ({ children }) => {
     const loginUser = async (email, password, navigate) => {
         setBtnLoading(true);
         try {
-            const { data } = await axios.post("http://localhost:5000/api/login",
+            const { data } = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/login`,
                 { email, password },
-                { withCredentials: true }
+                { 
+                    withCredentials: true,
+                    headers: { 'Content-Type': 'application/json' }
+                }
             );
+            
             console.log("Login response data:", data);
+            
             if (data && data.user) {
                 setUser(data.user);
                 setIsAuth(true);
-                localStorage.setItem("token", data.token); 
+                localStorage.setItem("token", data.token);
                 toast.success("Login Successful");
                 navigate("/");
             } else {
@@ -98,7 +134,7 @@ export const UserProvider = ({ children }) => {
         setUser,
         user,
         loading,
-        fetchUser // Expose fetchUser for manual refresh if needed
+        fetchUser
     }), [btnLoading, isAuth, user, loading]);
 
     return (

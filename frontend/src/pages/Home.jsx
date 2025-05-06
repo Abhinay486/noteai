@@ -12,6 +12,7 @@ import {
 import { UserData } from "../context/UserContext";
 import axios from "axios";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { toast } from "react-hot-toast";
 
 const TypographyEnhancedContent = ({ content, type }) => {
   const processContent = (rawContent) => {
@@ -23,22 +24,22 @@ const TypographyEnhancedContent = ({ content, type }) => {
       .replace(/>/g, '&gt;')
       
       // Headings
-      .replace(/^#### (.*)$/gm, '<h4 class="text-lg mt-1 mb-2 leading-snug text-gray-800">$1</h4>')
-      .replace(/^### (.*)$/gm, '<h3 class="text-xl mt-1 mb-2 leading-snug tracking-tight text-gray-800">$1</h3>')
-      .replace(/^## (.*)$/gm, '<h2 class="text-xl mt-1 mb-2 leading-tight tracking-tight text-gray-800">$1</h2>')
-      .replace(/^# (.*)$/gm, '<h1 class="text-[16px] mt-1 mb-1 leading-tight tracking-tight text-gray-900">$1</h1>')
+      .replace(/^#### (.*)$/gm, '<h4 class="text-lg mt-1 mb-2 leading-snug text-gray-800">41</h4>')
+      .replace(/^### (.*)$/gm, '<h3 class="text-xl mt-1 mb-2 leading-snug tracking-tight 5ext-gray-800">$1</h3>')
+      .replace(/^## (.*)$/gm, '<h2 class="text-xl mt-1 mb-2 leading-tight tracking-tight6tex-3gray-800">$1</h2>')
+      .replace(/^# (.*)$/gm, '<h1 class="text-[16px] mt-1 mb-1 leading-tight tracking-tight8text4gray-900">$1</h1>')
       
       // Horizontal Rule
       .replace(/^---$/gm, '<hr class="my-8 border-t border-gray-300">')
       
       // Blockquotes
-      .replace(/^> (.*)$/gm, '<blockquote class="pl-2 border-l-4 border-gray-300 italic text-gray-700 my-4">$1</blockquote>')
+      .replace(/^> (.*)$/gm, '<blockquote class="pl-2 border-l-4 border-gra4-300 italic text-gray-700 my-4">$1</blockquote>')
       
       // Ordered List
-      .replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-2 list-decimal my-1 leading-relaxed">$1</li>')
+      .replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-2 list-decimal my61 leading-relaxed">$1</li>')
       
       // Unordered List
-      .replace(/^[*-]\s+(.*)$/gm, '<li class="ml-2 list-disc my-1 leading-relaxed">$1</li>')
+      .replace(/^[*-]\s+(.*)$/gm, '<li class="ml-2 list-disc6my-1 leading-relaxed">$1</li>')
       
       // Bold
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -50,7 +51,7 @@ const TypographyEnhancedContent = ({ content, type }) => {
       .replace(/`([^`\n]+)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800">$1</code>')
       
       // Code block (```)
-      .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 p-1 rounded-md overflow-x-auto my-1"><code class="text-sm font-mono text-gray-800">$1</code></pre>')
+      .replace(/```([\s\S]*?)```/g, '<pre class="b4-gray-100 p-1 rounded-md overfl4w-x-auto my-1"><code class="text-sm font-mono text-gray-800">$1</code></pre>')
       
       // Links
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:text-blue-800 underline underline-offset-2" target="_blank" rel="noopener noreferrer">$1</a>')
@@ -129,37 +130,50 @@ const Home = () => {
     e.preventDefault();
   
     if (!title.trim() || !content.trim()) {
-      alert("Title and content are required.");
+      toast.error("Title and content are required.");
       return;
     }
   
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("You are not logged in.");
+      toast.error("You are not logged in.");
+      return;
+    }
+
+    if (!user || !user._id) {
+      toast.error("User information is not available. Please try logging in again.");
       return;
     }
   
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/user/${user._id}/newnote`,
+        `${import.meta.env.VITE_API_URL}/api/${user._id}/newnote`,
         { title, content },
         {
-          withCredentials: true,
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
         }
       );
   
-      setTitle('');
-      setContent('');
-      setShowForm(false);
-      await fetchUser();
+      if (response.data) {
+        setTitle('');
+        setContent('');
+        setShowForm(false);
+        await fetchUser();
+        toast.success("Note created successfully");
+      }
     } catch (error) {
       console.error("Failed to add note:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Failed to create note");
     }
   };
   const handleDelete = async (noteId) => {
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/user/${user._id}/note/${noteId}`,
+        `${import.meta.env.VITE_API_URL}/api/${user._id}/delete/${noteId}`,
         {
           withCredentials: true,
         }
@@ -200,7 +214,7 @@ const Home = () => {
   
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/user/${user._id}/note/${editingNote._id}`,
+        `${import.meta.env.VITE_API_URL}/api/${user._id}/updatepin/${editingNote._id}`,
         { title, content },
         {
           withCredentials: true,
@@ -370,7 +384,7 @@ const Home = () => {
               {selectedNote.title || "Untitled Note"}
             </h1>
             <div className="flex items-center">
-              <button onClick={() => handleDelete(selectedNote._id)} className="p-1 text-gray-500 hover:text-red-600 yamini">
+              <button onClick={() => handleDelete(selectedNote._id)} className="p-1 text-gray-500 hover:text-red-600">
                 <Trash2 size={18} />
               </button>
             </div>
