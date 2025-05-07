@@ -76,14 +76,13 @@ export const getAllnotes = TryCatch(async (req, res) => {
 
 export const createNote = TryCatch(async (req, res) => {
     const { title, content } = req.body;
-    const { userId } = req.params;
 
     // Validate request body
     if (!title || !content) {
         return res.status(400).json({ message: "Title and content are required" });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(req.params.id);
 
     if (!user) {
         return res.status(404).json({ message: "No user with this id" });
@@ -121,11 +120,18 @@ export const deleteNote = TryCatch(async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
   
-    user.notes.splice(notesIdx, 1);
+    // Optional ownership check
+    // if (user.notes[notesIdx].createdBy.toString() !== req.user.id) {
+    //   return res.status(403).json({ message: "Not authorized to delete this note" });
+    // }
+  
+    user.notes.splice(notesIdx, 1); // Remove the note
     await user.save();
   
     res.json({ message: "Note deleted successfully" });
-});
+  });
+  
+
 
 export const updateNote = TryCatch(async (req, res) => {
     const { userId, noteId } = req.params;
@@ -143,10 +149,11 @@ export const updateNote = TryCatch(async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
   
+    // Update the note fields
     const note = user.notes[notesIdx];
     if (req.body.title) note.title = req.body.title;
     if (req.body.content) note.content = req.body.content;
-    note.updatedAt = new Date();
+    note.createdAt = new Date(); // Optional: update timestamp
   
     await user.save();
   
@@ -154,7 +161,9 @@ export const updateNote = TryCatch(async (req, res) => {
       message: "Note updated successfully",
       updatedNote: note,
     });
-});
+  });
+  
+
 
 export const logOut = TryCatch(async (req, res) => {
     res.clearCookie("token", {

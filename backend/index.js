@@ -5,6 +5,11 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Initialize dotenv to load environment variables from .env file
 dotenv.config();
 
@@ -17,7 +22,7 @@ app.use(cookieParser());
 
 // CORS setup - allow frontend requests from localhost:5173 (your React app)
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: `${process.env.FRONTEND_URL}`,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -33,6 +38,14 @@ app.get("/", (req, res) => {
     res.send("Hello World!");  // Basic route for testing
 });
 
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+    
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    });
+  }
 // Start server and connect to database
 app.listen(port, async () => {
     console.log(`Server running on port ${port}`);

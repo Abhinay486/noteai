@@ -16,7 +16,7 @@ const SettingsPage = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/user/${user._id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/user/${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
