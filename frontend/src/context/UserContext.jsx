@@ -44,7 +44,7 @@ export const UserProvider = ({ children }) => {
     const registerUser = async (name, email, password, navigate) => {
         setBtnLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/register`, 
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/register`, 
                 { name, email, password },
                 { withCredentials: true }
             );
@@ -67,7 +67,7 @@ export const UserProvider = ({ children }) => {
     const loginUser = async (email, password, navigate) => {
         setBtnLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`,
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`,
                 { email, password },
                 { withCredentials: true }
             );
