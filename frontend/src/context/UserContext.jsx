@@ -17,7 +17,9 @@ export const UserProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
+            const token = localStorage.getItem('token');
             const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/me`, {
+                headers: { Authorization: `Bearer ${token}` },
                 withCredentials: true
             });
             if (data && data.user) {

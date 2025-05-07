@@ -3,7 +3,9 @@ import { User } from '../models/userModel.js';
 
 export const isAuth = async (req, res, next) => {
     try {
-        const token = req.cookies.token;
+        // Check for token in cookies or Authorization header
+        const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+        
         if (!token) {
             return res.status(401).json({
                 message: 'Please Login'
@@ -11,7 +13,7 @@ export const isAuth = async (req, res, next) => {
         }
 
         // Decode and verify the token
-        const decodedData = jwt.verify(token, process.env.JWT_SEC);
+        const decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
         // If token is expired or invalid, jwt.verify will throw an error
         req.user = await User.findById(decodedData.id);
