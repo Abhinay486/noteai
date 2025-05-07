@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
-import { CloudCog } from "lucide-react";
 
 const UserContext = createContext();
 
@@ -11,15 +10,18 @@ export const UserProvider = ({ children }) => {
     const [btnLoading, setBtnLoading] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    // Set Axios default auth header from localStorage (on page load/reload)
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
         fetchUser();
     }, []);
 
     const fetchUser = async () => {
         try {
-            const token = localStorage.getItem('token');
             const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/me`, {
-                headers: { Authorization: `Bearer ${token}` },
                 withCredentials: true
             });
             if (data && data.user) {
@@ -46,7 +48,8 @@ export const UserProvider = ({ children }) => {
     const registerUser = async (name, email, password, navigate) => {
         setBtnLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/register`, 
+            const { data } = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/users/register`, 
                 { name, email, password },
                 { withCredentials: true }
             );
@@ -69,15 +72,16 @@ export const UserProvider = ({ children }) => {
     const loginUser = async (email, password, navigate) => {
         setBtnLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`,
+            const { data } = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/users/login`,
                 { email, password },
                 { withCredentials: true }
             );
-            console.log("Login response data:", data);
             if (data && data.user) {
+                localStorage.setItem("token", data.token); 
+                axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
                 setUser(data.user);
                 setIsAuth(true);
-                localStorage.setItem("token", data.token); 
                 toast.success("Login Successful");
                 navigate("/");
             } else {
@@ -100,7 +104,7 @@ export const UserProvider = ({ children }) => {
         setUser,
         user,
         loading,
-        fetchUser // Expose fetchUser for manual refresh if needed
+        fetchUser
     }), [btnLoading, isAuth, user, loading]);
 
     return (
