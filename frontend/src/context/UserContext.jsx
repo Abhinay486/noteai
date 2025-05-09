@@ -13,16 +13,36 @@ export const UserProvider = ({ children }) => {
     // Set Axios default auth header from localStorage (on page load/reload)
     useEffect(() => {
         const token = localStorage.getItem('token');
+        console.log('Initial token check:', token ? 'Token exists' : 'No token found');
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            console.log('Authorization header set:', axios.defaults.headers.common['Authorization']);
         }
         fetchUser();
     }, []);
 
     const fetchUser = async () => {
         try {
+            const token = localStorage.getItem('token');
+            console.log('Fetching user with token:', token ? 'Token exists' : 'No token found');
+            
+            if (!token) {
+                console.log('No token found, skipping user fetch');
+                setIsAuth(false);
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            // Set the token in axios headers before making the request
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            console.log('Making request with headers:', axios.defaults.headers.common);
+            
             const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/me`, {
-                withCredentials: true
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
             if (data && data.user) {
                 setUser(data.user);
@@ -31,6 +51,7 @@ export const UserProvider = ({ children }) => {
                 console.error("Invalid user data received:", data);
                 setIsAuth(false);
                 setUser(null);
+                localStorage.removeItem('token'); // Clear invalid token
             }
         } catch (error) {
             console.error("Fetch user error:", {
@@ -38,6 +59,11 @@ export const UserProvider = ({ children }) => {
                 response: error.response?.data,
                 status: error.response?.status
             });
+            // If token is invalid or expired, clear it
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                delete axios.defaults.headers.common['Authorization'];
+            }
             setIsAuth(false);
             setUser(null);
         } finally {
@@ -70,6 +96,7 @@ export const UserProvider = ({ children }) => {
     };
 
     const loginUser = async (email, password, navigate) => {
+        console.log("Attempting login to:", import.meta.env.VITE_API_URL);
         setBtnLoading(true);
         try {
             const { data } = await axios.post(
@@ -77,7 +104,8 @@ export const UserProvider = ({ children }) => {
                 { email, password },
                 { withCredentials: true }
             );
-            if (data && data.user) {
+            if (data && data.user && data.token) {
+                console.log('Login successful, storing token');
                 localStorage.setItem("token", data.token); 
                 axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
                 setUser(data.user);
@@ -85,6 +113,7 @@ export const UserProvider = ({ children }) => {
                 toast.success("Login Successful");
                 navigate("/");
             } else {
+                console.error('Login response missing required data:', data);
                 throw new Error("Invalid response from server");
             }
         } catch (error) {

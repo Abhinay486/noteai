@@ -3,17 +3,15 @@ import { User } from '../models/userModel.js';
 
 export const isAuth = async (req, res, next) => {
     try {
-        // Check for token in cookies or Authorization header
-        const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-        
+        const token = req.cookies.token;
         if (!token) {
-            return res.status(401).json({
+            return res.status(403).json({
                 message: 'Please Login'
             });
         }
 
         // Decode and verify the token
-        const decodedData = jwt.verify(token, process.env.JWT_SECRET);
+        const decodedData = jwt.verify(token, process.env.JWT_SEC);
 
         // If token is expired or invalid, jwt.verify will throw an error
         req.user = await User.findById(decodedData.id);
@@ -27,11 +25,11 @@ export const isAuth = async (req, res, next) => {
     } catch (error) {
         // Handling different JWT errors explicitly
         if (error instanceof jwt.TokenExpiredError) {
-            return res.status(401).json({
+            return res.status(403).json({
                 message: 'Token expired'
             });
         } else if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(401).json({
+            return res.status(403).json({
                 message: 'Invalid token'
             });
         }
@@ -42,4 +40,3 @@ export const isAuth = async (req, res, next) => {
         });
     }
 };
-
