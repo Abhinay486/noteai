@@ -5,7 +5,7 @@ export const isAuth = async (req, res, next) => {
     try {
         const token = req.cookies.token;
         if (!token) {
-            return res.status(403).json({
+            return res.status(401).json({
                 message: 'Please Login'
             });
         }
@@ -25,11 +25,11 @@ export const isAuth = async (req, res, next) => {
     } catch (error) {
         // Handling different JWT errors explicitly
         if (error instanceof jwt.TokenExpiredError) {
-            return res.status(403).json({
+            return res.status(401).json({
                 message: 'Token expired'
             });
         } else if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(403).json({
+            return res.status(401).json({
                 message: 'Invalid token'
             });
         }
@@ -40,3 +40,4 @@ export const isAuth = async (req, res, next) => {
         });
     }
 };
+

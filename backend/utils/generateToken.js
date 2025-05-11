@@ -10,7 +10,8 @@ const generateToken = (id, res) => {
         httpOnly: true,
         sameSite: "strict",
         secure: process.env.NODE_ENV === "production",
-        path: "/", // Add path to ensure cookie is sent with all requests
+        path: "/",
+        domain: process.env.COOKIE_DOMAIN, // Add domain for production
     });
 
     return token; // Return the token

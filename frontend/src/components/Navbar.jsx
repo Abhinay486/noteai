@@ -29,10 +29,8 @@ const Navbar = ({ user }) => {
   }, []);
 
   const logOutHand = async () => {
-    const token = localStorage.getItem('token');
     try {
       await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`, {
-        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
       localStorage.removeItem('token');

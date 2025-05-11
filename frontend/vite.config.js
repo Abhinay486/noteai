@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(),  tailwindcss()],
+  base: process.env.NODE_ENV === 'production' ? '/' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'), // Alias for the src folder
