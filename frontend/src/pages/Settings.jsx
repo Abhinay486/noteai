@@ -15,12 +15,9 @@ const SettingsPage = () => {
 
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/user/${user._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
-      localStorage.removeItem('token');
       window.location.href = '/login';
       toast.success('Account deleted successfully');
     } catch (error) {

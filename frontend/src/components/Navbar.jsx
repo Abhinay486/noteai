@@ -33,14 +33,12 @@ const Navbar = ({ user }) => {
       await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`, {
         withCredentials: true
       });
-      localStorage.removeItem('token');
       setIsAuth(false);
       setUser(null);
       toast.success("Logged out successfully");
       navigate("/login");
     } catch (error) {
       toast.error(error.response?.data?.message || "Logout failed");
-      localStorage.removeItem('token');
       setIsAuth(false);
       setUser(null);
       navigate("/login");

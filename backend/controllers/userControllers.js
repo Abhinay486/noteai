@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs'
 import { User } from '../models/userModel.js';
 import TryCatch from '../utils/TryCatch.js';
 import generateToken from '../utils/generateToken.js'
+import jwt from 'jsonwebtoken';
+
 export const registerUser = TryCatch(async(req, res) => {
     const {name, email, password} = req.body;
 
@@ -45,20 +47,28 @@ export const loginUser = TryCatch(async(req, res) => {
     }
 
     // Generate token and set it in cookie
-    const token = generateToken(user._id, res);
+    generateToken(user._id, res);
 
-    // Send token in response as well for localStorage
+    // Send response without token
     res.json({
         message: "Logged In",
-        user,
-        token, // Send token for localStorage usage
+        user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email
+        }
     });
 })
 
 export const myProfile = TryCatch(async(req, res) => {
-    const user = await User.findById(req.user._id)
-    
-    res.json({user})
+  // Remove token verification since isAuth middleware already does this
+  const user = await User.findById(req.user._id).select("-password");
+  
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.status(200).json({ user });
 });
 
 export const getAllnotes = TryCatch(async (req, res) => {
@@ -169,7 +179,7 @@ export const logOut = TryCatch(async (req, res) => {
     res.clearCookie("token", {
         httpOnly: true, // Ensure it matches the cookie settings when it was set
         secure: process.env.NODE_ENV === "production", // Ensure compatibility with HTTPS in production
-        sameSite: "strict", 
+        sameSite: 'lax',
     });
 
     res.json({

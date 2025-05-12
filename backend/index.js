@@ -16,23 +16,18 @@ app.use(express.json());
 app.use(cookieParser());
 
 // CORS setup - allow frontend requests from localhost:5173 (your React app)
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL, 'https://noteai-aukb.onrender.com'] 
-    : ['http://localhost:5173'];
-
 app.use(cors({
-    origin: function(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'https://abc123.loca.lt' // Add this to allow mobile browser access
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Set-Cookie']
-}));
+  }));
+  
+
 // Import routes (Make sure you have your userRoutes.js file set up correctly)
 import userRoutes from './routes/userRoutes.js';
 app.use("/api", userRoutes);
@@ -44,7 +39,7 @@ app.get("/", (req, res) => {
 });
 
 // Start server and connect to database
-app.listen(port, async () => {
+app.listen(port,'0.0.0.0', async () => {
     console.log(`Server running on port ${port}`);
     await connectDb();  // Assuming you have a function to connect to your DB
 });

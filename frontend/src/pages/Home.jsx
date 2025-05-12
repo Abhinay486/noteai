@@ -133,12 +133,6 @@ const Home = () => {
       return;
     }
   
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You are not logged in.");
-      return;
-    }
-  
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/newnote`,
@@ -189,12 +183,6 @@ const Home = () => {
   
     if (!title.trim() || !content.trim()) {
       alert("Title and content are required.");
-      return;
-    }
-  
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You are not logged in.");
       return;
     }
   
