@@ -4,6 +4,8 @@ import connectDb from './database/db.js'; // Ensure you have a proper DB connect
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 // Initialize dotenv to load environment variables from .env file
 dotenv.config();
@@ -19,7 +21,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
       process.env.FRONTEND_URL || 'http://localhost:5173',
-      'https://abc123.loca.lt' // Add this to allow mobile browser access
+      'http://192.168.29.78:5173' // Add this to allow mobile browser access
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -27,6 +29,7 @@ app.use(cors({
     exposedHeaders: ['Set-Cookie']
   }));
   
+
 
 // Import routes (Make sure you have your userRoutes.js file set up correctly)
 import userRoutes from './routes/userRoutes.js';

@@ -1,14 +1,13 @@
 import express from "express";
-import { isAuth } from '../middlewares/isAuth.js';
-import { registerUser, loginUser, logOut, myProfile, createNote, updateNote, deleteNote, getAllnotes } from "../controllers/userControllers.js";
+import { registerUser, loginUser, logOut, myProfile, createNote, updateNote, deleteNote, Refresh } from "../controllers/userControllers.js";
 const router = express.Router();
 router.post("/users/register", registerUser);
 router.post("/users/login", loginUser);
-router.get("/me", isAuth, myProfile)
-router.get("/logout", isAuth, logOut)
-router.post("/notes/:id/newnote", isAuth, createNote);
-router.put("/notes/:userId/updatepin/:noteId", isAuth, updateNote);
-router.delete("/notes/:userId/delete/:noteId", isAuth, deleteNote);
-// router.get("/notes", isAuth, getAllnotes);
+router.get("/me", myProfile)
+router.get("/logout", logOut)
+router.post("/notes/:id/newnote", createNote);
+router.put("/notes/:userId/updatepin/:noteId", updateNote);
+router.delete("/notes/:userId/delete/:noteId", deleteNote);
+router.post("/refresh", Refresh);
 export default router;
 

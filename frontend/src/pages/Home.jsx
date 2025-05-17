@@ -138,6 +138,7 @@ const Home = () => {
         `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/newnote`,
         { title, content },
         {
+          credentials: "include",
           withCredentials: true,
         }
       );
@@ -155,10 +156,11 @@ const Home = () => {
       const response = await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/delete/${noteId}`,
         {
+          credentials: "include",
           withCredentials: true,
         }
       );
-      console.log("Note deleted successfully:", response.data);
+      // console.log("Note deleted successfully:", response.data);
       await fetchUser();
     } catch (error) {
       console.error("Failed to delete note:", error.response?.data || error.message);
@@ -191,6 +193,7 @@ const Home = () => {
         `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/updatepin/${editingNote._id}`,
         { title, content },
         {
+        credentials: "include",
           withCredentials: true,
         }
       );
@@ -208,9 +211,32 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
   const [selectedNote, setSelectedNote] = useState(null);
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  
+  // Show loading state only when initial loading is true
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
-  if (!user || !user.notes) return <div className="text-center mt-10">No user or notes found.</div>;
+  // Only show "No user or notes found" if we're sure we're not loading
+  if (!loading && (!user || !user.notes)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-gray-600 mb-4">No notes found</p>
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+        >
+          <Plus size={18} />
+          <span>Create Your First Note</span>
+        </button>
+      </div>
+    );
+  }
+
   // Filter notes based on search term
   const filteredNotes = user.notes.filter(
     (note) =>

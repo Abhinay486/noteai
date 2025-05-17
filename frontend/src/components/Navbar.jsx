@@ -31,7 +31,8 @@ const Navbar = ({ user }) => {
   const logOutHand = async () => {
     try {
       await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`, {
-        withCredentials: true
+        withCredentials: true,
+        credentials: "include"
       });
       setIsAuth(false);
       setUser(null);
