@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { UserData } from "../context/UserContext";
 import axios from "axios";
 import toast from "react-hot-toast";
+const VITE_API_URL="https://noteai-aukb.onrender.com";
 
 const Navbar = ({ user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,7 +31,7 @@ const Navbar = ({ user }) => {
 
   const logOutHand = async () => {
     try {
-      await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`, {
+      await axios.get(`${VITE_API_URL}/api/logout`, {
         withCredentials: true,
         credentials: "include"
       });

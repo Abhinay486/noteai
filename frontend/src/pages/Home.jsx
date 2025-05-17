@@ -12,6 +12,7 @@ import {
 import { UserData } from "../context/UserContext";
 import axios from "axios";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+const VITE_API_URL="https://noteai-aukb.onrender.com";
 
 const TypographyEnhancedContent = ({ content, type }) => {
   const processContent = (rawContent) => {
@@ -135,7 +136,7 @@ const Home = () => {
   
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/newnote`,
+        `${VITE_API_URL}/api/notes/${user._id}/newnote`,
         { title, content },
         {
           credentials: "include",
@@ -154,7 +155,7 @@ const Home = () => {
   const handleDelete = async (noteId) => {
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/delete/${noteId}`,
+        `${VITE_API_URL}/api/notes/${user._id}/delete/${noteId}`,
         {
           credentials: "include",
           withCredentials: true,
@@ -190,7 +191,7 @@ const Home = () => {
   
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/notes/${user._id}/updatepin/${editingNote._id}`,
+        `${VITE_API_URL}/api/notes/${user._id}/updatepin/${editingNote._id}`,
         { title, content },
         {
         credentials: "include",

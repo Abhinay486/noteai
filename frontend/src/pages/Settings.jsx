@@ -3,6 +3,7 @@ import { UserData } from '../context/UserContext';
 import { Settings, User, Lock, Bell, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+const VITE_API_URL="https://noteai-aukb.onrender.com";
 
 const SettingsPage = () => {
   const { user } = UserData();
@@ -15,7 +16,7 @@ const SettingsPage = () => {
 
     setIsLoading(true);
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/user/${user._id}`, {
+      await axios.delete(`${VITE_API_URL}/api/user/${user._id}`, {
         credentials: "include",
         withCredentials: true
       });

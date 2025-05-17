@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+const VITE_API_URL="https://noteai-aukb.onrender.com";
 
 axios.defaults.withCredentials = true;
 
@@ -28,7 +29,7 @@ export const UserProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/me`, {
+      const { data } = await axios.get(`${VITE_API_URL}/api/me`, {
         withCredentials: true,
         credentials: "include",
       });
@@ -39,12 +40,12 @@ export const UserProvider = ({ children }) => {
         // Try to refresh the token
         try {
           setIsRefreshing(true);
-          await axios.post(`${import.meta.env.VITE_API_URL}/api/refresh`, {}, {
+          await axios.post(`${VITE_API_URL}/api/refresh`, {}, {
             withCredentials: true,
             credentials: "include",
           });
           // Retry fetching user data after successful refresh
-          const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/me`, {
+          const { data } = await axios.get(`${VITE_API_URL}/api/me`, {
             withCredentials: true,
             credentials: "include",
           });
@@ -73,7 +74,7 @@ export const UserProvider = ({ children }) => {
       if (isAuth) {
         try {
           setIsRefreshing(true);
-          await axios.post(`${import.meta.env.VITE_API_URL}/api/refresh`, {}, {
+          await axios.post(`${VITE_API_URL}/api/refresh`, {}, {
             withCredentials: true,
             credentials: "include",
           });
@@ -93,7 +94,7 @@ export const UserProvider = ({ children }) => {
   const registerUser = async (name, email, password, navigate) => {
     setBtnLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/register`, {
+      const res = await fetch(`${VITE_API_URL}/api/users/register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -115,7 +116,7 @@ export const UserProvider = ({ children }) => {
     setBtnLoading(true);
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/users/login`,
+        `${VITE_API_URL}/api/users/login`,
         { email, password },
         { 
           credentials: "include",
@@ -137,7 +138,7 @@ export const UserProvider = ({ children }) => {
 
   const logOut = async () => {
     try {
-      await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`, {
+      await axios.get(`${VITE_API_URL}/api/logout`, {
         credentials: "include",
       });
       setUser(null);
