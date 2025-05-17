@@ -5,7 +5,7 @@ import { User } from '../models/userModel.js';
 export const isAuth = async (req, res, next) => {
     try {
         // Check for token in cookies or Authorization header
-        const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+        const token = req.cookies.accessToken || req.headers.authorization?.split(' ')[1];
 
         if (!token) {
             return res.status(401).json({
@@ -15,7 +15,7 @@ export const isAuth = async (req, res, next) => {
         }
 
         // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SEC);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.id).select('-password');
 
         if (!user) {
