@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import { UserData } from "../context/UserContext";
 import axios from "axios";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-const VITE_API_URL="https://noteai-aukb.onrender.com";
+import { GoogleGenAI } from "@google/genai";
 
+const VITE_API_URL="http://localhost:5000";
 const TypographyEnhancedContent = ({ content, type }) => {
   const processContent = (rawContent) => {
     if (!rawContent) return '';
@@ -280,41 +280,36 @@ const Home = () => {
   const handleGenerateContent = async (content) => {
     setIsGenerating(true);
     setGenerationError(null);
-    setGeneratedContent('');
-
-    const apiKey = import.meta.env.VITE_GEMINI_API;
-    if (!apiKey) {
-      setGenerationError("Gemini API key not found. Please check your environment variables.");
-      setIsGenerating(false);
-      return;
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
-
+    setGeneratedContent("");
+  
+    const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API });
+  
     try {
-      const result = await model.generateContentStream({
+      // Use generateContentStream for streaming response
+      const result = await genAI.models.generateContentStream({
+        model: "gemini-2.0-flash",
         contents: [
           {
             role: "user",
             parts: [
-              { text: `Generate a detailed analysis of the following topic: "${content}". 
-              Please structure your response with:
-              1. A main heading
-              2. Key points as bullet points
-              3. Each section should have a subheading
-              4. Use markdown formatting for better readability
-              5. Keep points concise and informative
-              6. Include relevant examples where appropriate` },
+              {
+                text: `Generate a detailed analysis of the following topic: "${content}". 
+                Please structure your response with:
+                1. A main heading
+                2. Key points as bullet points
+                3. Each section should have a subheading
+                4. Use markdown formatting for better readability
+                5. Keep points concise and informative
+                6. Include relevant examples where appropriate`,
+              },
             ],
           },
         ],
       });
-
-      let fullResponse = '';
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        fullResponse += chunkText;
+  
+      let fullResponse = "";
+      for await (const chunk of result) {
+        fullResponse += chunk.text;
         setGeneratedContent(fullResponse);
       }
     } catch (err) {
@@ -324,24 +319,17 @@ const Home = () => {
       setIsGenerating(false);
     }
   };
-
+  
   const handleSummariseContent = async (content) => {
     setIsSummarizing(true);
     setGenerationError(null);
-    setSummarisedContent('');
-
-    const apiKey = import.meta.env.VITE_GEMINI_API;
-    if (!apiKey) {
-      setGenerationError("Gemini API key not found. Please check your environment variables.");
-      setIsSummarizing(false);
-      return;
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
-
+    setSummarisedContent("");
+  
+    const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API });
+  
     try {
-      const result = await model.generateContentStream({
+      const result = await genAI.models.generateContentStream({
+        model: "gemini-2.0-flash",
         contents: [
           {
             role: "user",
@@ -351,20 +339,20 @@ const Home = () => {
           },
         ],
       });
-
-      let fullResponse = '';
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        fullResponse += chunkText;
+  
+      let fullResponse = "";
+      for await (const chunk of result) {
+        fullResponse += chunk.text;
         setSummarisedContent(fullResponse);
       }
     } catch (err) {
-      console.error("Error during content summarization:", err);
-      setGenerationError("Something went wrong while summarizing content.");
+      console.error("Error during content generation:", err);
+      setGenerationError("Something went wrong while generating content.");
     } finally {
       setIsSummarizing(false);
     }
   };
+  
 
   if (selectedNote) {
     return (
