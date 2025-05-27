@@ -12,8 +12,7 @@ import {
 import { UserData } from "../context/UserContext";
 import axios from "axios";
 import { GoogleGenAI } from "@google/genai";
-
-const VITE_API_URL="http://localhost:5000";
+const VITE_API_URL="https://noteai-aukb.onrender.com";
 const TypographyEnhancedContent = ({ content, type }) => {
   const processContent = (rawContent) => {
     if (!rawContent) return '';
