@@ -193,7 +193,6 @@ export const deleteNote = TryCatch(async (req, res) => {
 });
 
 
-
 export const updateNote = TryCatch(async (req, res) => {
   const { userId, noteId } = req.params;
 
@@ -210,11 +209,19 @@ export const updateNote = TryCatch(async (req, res) => {
     return res.status(404).json({ message: "Note not found" });
   }
 
-  // Update the note fields
   const note = user.notes[notesIdx];
+
+  // Save current state to history before updating
+  note.history.push({
+    title: note.title,
+    content: note.content,
+    editedAt: new Date(),
+  });
+
+  // Update note fields
   if (req.body.title) note.title = req.body.title;
   if (req.body.content) note.content = req.body.content;
-  note.createdAt = new Date(); // Optional: update timestamp
+  note.updatedAt = new Date();
 
   await user.save();
 
@@ -223,6 +230,8 @@ export const updateNote = TryCatch(async (req, res) => {
     updatedNote: note,
   });
 });
+
+
 
 
 export const logOut = TryCatch(async (req, res) => {

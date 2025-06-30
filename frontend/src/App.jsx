@@ -15,6 +15,7 @@ const App = () => {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
+        {isAuth && <div className="bg-blue-500 text-white p-4 text-center">Welcome, {user.name}!</div>}
         <Navbar user={user}/>
         <Routes>
           <Route path="/" element={isAuth ? <Home /> : <Navigate to="/login" />} />

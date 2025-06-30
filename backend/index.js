@@ -19,9 +19,7 @@ app.use(cookieParser());
 
 // CORS setup - allow frontend requests from localhost:5173 (your React app)
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? ['https://notes1ai.vercel.app'] // Replace with your actual frontend domain
-      : ['http://localhost:5173', 'http://192.168.29.78:5173'],
+    origin: process.env.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

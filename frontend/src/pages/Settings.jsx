@@ -3,7 +3,7 @@ import { UserData } from '../context/UserContext';
 import { Settings, User, Lock, Bell, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-const VITE_API_URL="https://noteai-aukb.onrender.com";
+const VITE_API_URL=import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const SettingsPage = () => {
   const { user } = UserData();
