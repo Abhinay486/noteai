@@ -10,7 +10,12 @@ import SettingsPage from './pages/Settings';
 import Profile from './pages/Profile';
 
 const App = () => {
-  const { user, isAuth } = UserData();
+  const { user, isAuth, loading } = UserData();
+
+  if (loading) {
+    // Prevent rendering until auth is checked
+    return null;
+  }
 
   return (
     <Router>

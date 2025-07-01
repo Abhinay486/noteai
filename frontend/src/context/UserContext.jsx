@@ -28,45 +28,48 @@ export const UserProvider = ({ children }) => {
   
 
   const fetchUser = async () => {
-    try {
-      const { data } = await axios.get(`${VITE_API_URL}/api/me`, {
-        withCredentials: true,
-        credentials: "include",
-      });
-      setUser(data.user);
-      setIsAuth(true);
-    } catch (error) {
-      if (error.response?.status === 401) {
-        // Try to refresh the token
-        try {
-          setIsRefreshing(true);
-          await axios.post(`${VITE_API_URL}/api/refresh`, {}, {
-            withCredentials: true,
-            credentials: "include",
-          });
-          // Retry fetching user data after successful refresh
-          const { data } = await axios.get(`${VITE_API_URL}/api/me`, {
-            withCredentials: true,
-            credentials: "include",
-          });
-          setUser(data.user);
-          setIsAuth(true);
-        } catch (refreshError) {
-          console.error("Token refresh failed", refreshError);
-          setUser(null);
-          setIsAuth(false);
-        } finally {
-          setIsRefreshing(false);
-        }
-      } else {
-        console.error("Auth check failed", error.response?.data || error.message);
+  try {
+    const { data } = await axios.get(`${VITE_API_URL}/api/me`, {
+      withCredentials: true,
+    });
+    setUser(data.user);
+    setIsAuth(true);
+  } catch (error) {
+    if (error.response?.status === 401) {
+      try {
+        setIsRefreshing(true);
+
+        // Attempt token refresh
+        await axios.post(`${VITE_API_URL}/api/refresh`, {}, {
+          withCredentials: true,
+        });
+
+        // Retry user fetch after successful refresh
+        const { data } = await axios.get(`${VITE_API_URL}/api/me`, {
+          withCredentials: true,
+        });
+
+        setUser(data.user);
+        setIsAuth(true);
+      } catch (refreshError) {
+        // 🔥 Likely: no refresh token → don't retry endlessly
+        console.error("❌ Token refresh failed — user likely not logged in.", refreshError);
         setUser(null);
         setIsAuth(false);
+        navigate("/login");
+      } finally {
+        setIsRefreshing(false);
       }
-    } finally {
-      setLoading(false);
+    } else {
+      console.error("Auth check failed:", error.response?.data || error.message);
+      setUser(null);
+      setIsAuth(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Add token refresh interval
   useEffect(() => {
