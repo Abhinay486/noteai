@@ -12,6 +12,7 @@ import {
 import { UserData } from "../context/UserContext";
 import axios from "axios";
 import { GoogleGenAI } from "@google/genai";
+import NoteViewer from "../components/NoteViewer";
 const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const TypographyEnhancedContent = ({ content, type }) => {
@@ -420,11 +421,16 @@ const Home = () => {
             </span>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-              {selectedNote.content || "No content"}
-            </p>
-          </div>
+          <NoteViewer
+            selectedNote={selectedNote}
+            refreshNotes={async () => {
+              await fetchUser();
+              // Find the updated note from the latest user.notes
+              const updated = user.notes.find(n => n._id === selectedNote._id);
+              if (updated) setSelectedNote(updated);
+            }}
+            userId={user._id}
+          />
 
           <div className="flex justify-between items-center mb-6 mt-6">
             <button

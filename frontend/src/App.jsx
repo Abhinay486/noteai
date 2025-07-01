@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Notes from './pages/Notes';
 import SettingsPage from './pages/Settings';
 import Profile from './pages/Profile';
+import ImageUpload from './pages/ImageUpload';
 
 const App = () => {
   const { user, isAuth, loading } = UserData();
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="/notes" element={isAuth ? <Notes /> : <Navigate to="/login" />} />
           <Route path="/settings" element={isAuth ? <SettingsPage /> : <Navigate to="/login" />} />
           <Route path="/profile" element={isAuth ? <Profile /> : <Navigate to="/login" />} />
+          <Route path="/image-upload" element={isAuth ? <ImageUpload userId={user._id} /> : <Navigate to="/login" />} />
           <Route path="/login" element={!isAuth ? <Login /> : <Navigate to="/" />} />
           <Route path="/register" element={!isAuth ? <Register /> : <Navigate to="/" />} />
         </Routes>

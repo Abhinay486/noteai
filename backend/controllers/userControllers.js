@@ -91,7 +91,7 @@ export const myProfile = TryCatch(async (req, res) => {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password -refreshToken');
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({user});
+    res.json({ user });
   } catch {
     res.status(401).json({ error: "Invalid access token" });
   }
@@ -135,34 +135,6 @@ export const Refresh = TryCatch(async (req, res) => {
   }
 });
 
-export const createNote = TryCatch(async (req, res) => {
-  const { title, content } = req.body;
-
-  // Validate request body
-  if (!title || !content) {
-    return res.status(400).json({ message: "Title and content are required" });
-  }
-
-  const user = await User.findById(req.params.id);
-
-  if (!user) {
-    return res.status(404).json({ message: "No user with this id" });
-  }
-
-  const newNote = {
-    title,
-    content,
-    createdAt: new Date()
-  };
-
-  user.notes.push(newNote);
-  await user.save();
-
-  res.status(201).json({
-    message: "Note added successfully",
-    note: newNote
-  });
-});
 
 export const deleteNote = TryCatch(async (req, res) => {
   const { userId, noteId } = req.params;
@@ -191,6 +163,7 @@ export const deleteNote = TryCatch(async (req, res) => {
 
   res.json({ message: "Note deleted successfully" });
 });
+
 
 
 export const updateNote = TryCatch(async (req, res) => {
@@ -251,3 +224,153 @@ export const logOut = TryCatch(async (req, res) => {
     .json({ message: "Logged out" });
 });
 
+export const createNote = TryCatch(async (req, res) => {
+  const { title, content } = req.body;
+
+  // Validate request body
+  if (!title || !content) {
+    return res.status(400).json({ message: "Title and content are required" });
+  }
+
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({ message: "No user with this id" });
+  }
+
+  const newNote = {
+    title,
+    content,
+    createdAt: new Date()
+  };
+
+  user.notes.push(newNote);
+  await user.save();
+
+  res.status(201).json({
+    message: "Note added successfully",
+    note: newNote
+  });
+});
+
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+
+// Initialize Gemini
+
+export const chatBotResponse = TryCatch(async (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: "Message is required." });
+
+  // Load the model
+  // console.log("API KEY :", process.env.GEMINI_API_KEY);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+  const result = await model.generateContent(`
+    You're an AI assistant that extracts a note title and generates detailed content.
+
+    From this user instruction:
+    "${message}"
+
+    Identify the note's title and generate informative, structured content for that note.
+
+    Return ONLY JSON in the following format (without any markdown code block):
+    {
+      "title": "Extracted Title",
+      "content": "Full AI-generated note content"
+    }
+  `);
+
+  const response = await result.response;
+  const rawText = response.text();
+
+  // Strip markdown code block if it exists
+  const cleanText = rawText
+    .replace(/^```json\n/, "")
+    .replace(/^```/, "")
+    .replace(/```$/, "")
+    .trim();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(cleanText);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Failed to parse Gemini response",
+      raw: rawText
+    });
+  }
+
+  const { title, content } = parsed;
+  if (!title || !content) {
+    return res.status(400).json({ error: "Incomplete data from Gemini", parsed });
+  }
+
+  // Save to user notes
+  const user = await User.findById(req.params.id); // assumes you send user ID in route param
+  if (!user) {
+    return res.status(404).json({ message: "No user with this id" });
+  }
+
+
+  const newNote = {
+    title,
+    content,
+    createdAt: new Date()
+  };
+
+  user.notes.push(newNote);
+  await user.save();
+
+  res.status(201).json({
+    message: "Note added successfully via chatbot",
+    note: newNote
+  });
+});
+
+
+export const ImageUpload = TryCatch(async (req, res) => {
+
+  const { image } = req.body;
+
+  if (!image) return res.status(400).json({ error: "Image data is required." });
+
+  const buffer = Buffer.from(image, "base64");
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+Please:
+- Do NOT rephrase or rewrite the content.
+- Only correct spelling mistakes, grammar, punctuation, and formatting.
+- Maintain the original structure and meaning.
+- Assign a relevant title for the extracted content.
+
+Return the result exactly in this format:
+**Title:** [title]
+**Corrected Content:** [refined content]
+`;
+
+  const result = await model.generateContent([
+    { text: prompt },
+    { inlineData: { mimeType: "image/jpeg", data: image } }
+  ]);
+
+  const geminiResponse = await result.response.text();
+
+  // Optional: Extract title and corrected content (if needed by frontend)
+  const titleMatch = geminiResponse.match(/\*\*Title:\*\*\s*(.+)/i);
+  const contentMatch = geminiResponse.match(/\*\*Corrected Content:\*\*\s*([\s\S]*)/i);
+
+  const title = titleMatch ? titleMatch[1].trim() : "Untitled";
+  const correctedContent = contentMatch ? contentMatch[1].trim() : geminiResponse;
+
+
+  res.status(200).json({
+    message: "Image processed successfully",
+    title,
+    correctedContent
+  });
+});

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Home, FileText, Settings, User, LogOut } from "lucide-react";
+import { Menu, X, Home, FileText, Settings, User, LogOut, Image } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserData } from "../context/UserContext";
 import axios from "axios";
@@ -65,7 +65,9 @@ const Navbar = ({ user }) => {
     { name: "Home", icon: <Home size={18} />, path: "/" },
     { name: "My Notes", icon: <FileText size={18} />, path: "/notes" },
     { name: "Settings", icon: <Settings size={18} />, path: "/settings" },
-    { name: "Profile", icon: <User size={18} />, path: "/profile" }
+    { name: "Profile", icon: <User size={18} />, path: "/profile" },
+    { name: "ImageUpload", icon: <Image size={18} />, path: "/image-upload" },
+
   ];
 
   return (

@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware for parsing JSON and cookies
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
 // CORS setup - allow frontend requests from localhost:5173 (your React app)
