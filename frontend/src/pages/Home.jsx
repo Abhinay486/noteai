@@ -9,10 +9,13 @@ import {
   ChevronUp,
   ArrowLeft,
 } from "lucide-react";
+import toast from 'react-hot-toast';
+import { LuCopy } from "react-icons/lu";
 import { UserData } from "../context/UserContext";
 import axios from "axios";
 import { GoogleGenAI } from "@google/genai";
 import NoteViewer from "../components/NoteViewer";
+
 const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const TypographyEnhancedContent = ({ content, type }) => {
@@ -68,7 +71,7 @@ const TypographyEnhancedContent = ({ content, type }) => {
 
       // Paragraphs - only match non-empty lines that aren't already HTML elements
       .replace(/^(?!<h|<ul|<ol|<li|<pre|<blockquote|<hr|<table|<tr|<th|<td)([^<].+?)(?:\n|$)/gm, (match, content) => {
-        return content.trim() ? `<p class="my-3 leading-relaxed text-gray-700">${content.trim()}</p>` : '';
+        return content.trim() ? `<p class="inoput my-3 leading-relaxed text-gray-700">${content.trim()}</p>` : '';
       })
 
       // Line breaks - only add <br> between paragraphs
@@ -76,6 +79,8 @@ const TypographyEnhancedContent = ({ content, type }) => {
   };
 
   const containerClass = "bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-200";
+  
+  
 
   return (
     <div className="mt-6 border-t border-gray-200 pt-6">
@@ -83,6 +88,15 @@ const TypographyEnhancedContent = ({ content, type }) => {
         {type === 'generated' ? 'Generated Content' : 'Summarized Content'}
       </h2>
       <div className={containerClass}>
+        <div className="flex items-center justify-end">
+          <button
+          onClick={() => {
+            const text = document.querySelector('.inoput').innerText;
+            navigator.clipboard.writeText(text);
+            toast.success('Content copied to clipboard!', { duration: 2000 });
+          }}
+        ><LuCopy style={{ cursor: "pointer"}} /></button>
+        </div>
         <div
           className="prose prose-lg max-w-none"
           dangerouslySetInnerHTML={{ __html: processContent(content) }}
@@ -539,10 +553,11 @@ const Home = () => {
       </div>
     );
   }
+  
 
 
+  return(
 
-  return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       {showForm && (
          <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -726,6 +741,7 @@ const Home = () => {
           )}
         </div>
       )}
+    
     </div>
 
   );
