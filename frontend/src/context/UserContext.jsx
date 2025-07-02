@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const VITE_API_URL= import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 axios.defaults.withCredentials = true;
@@ -16,6 +17,7 @@ const LoadingSpinner = () => (
 );
 
 export const UserProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -89,7 +91,7 @@ export const UserProvider = ({ children }) => {
           setIsRefreshing(false);
         }
       }
-    }, 14 * 60 * 1000); // Refresh every 14 minutes (before 15-minute expiry)
+    }, 2 * 14 * 60 * 1000); // Refresh every 14 minutes (before 15-minute expiry)
 
     return () => clearInterval(refreshInterval);
   }, [isAuth]);

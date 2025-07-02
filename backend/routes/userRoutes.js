@@ -9,7 +9,7 @@ router.post("/notes/:id/newnote", createNote);
 router.put("/notes/:userId/updatepin/:noteId", updateNote);
 router.delete("/notes/:userId/delete/:noteId", deleteNote);
 router.post("/refresh", Refresh);
-router.post("/chat-bot", chatBotResponse)
+router.post("/chat-bot", chatBotResponse);
 router.post("/image-upload", ImageUpload); // Assuming you have an ImageUpload controller function
 export default router;
 

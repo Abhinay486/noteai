@@ -121,7 +121,7 @@ export const Refresh = TryCatch(async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 15 * 60 * 1000, // 15 minutes
+        maxAge: 15 * 60 * 1000 * 2, // 15 minutes
       })
       .cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
@@ -259,11 +259,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Initialize Gemini
 
 export const chatBotResponse = TryCatch(async (req, res) => {
-  const { message } = req.body;
-  if (!message) return res.status(400).json({ error: "Message is required." });
+  const { message, userId } = req.body;
+  if (!message || !userId) return res.status(400).json({ error: "Message and userId are required." });
 
   // Load the model
-  // console.log("API KEY :", process.env.GEMINI_API_KEY);
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
@@ -308,11 +307,10 @@ export const chatBotResponse = TryCatch(async (req, res) => {
   }
 
   // Save to user notes
-  const user = await User.findById(req.params.id); // assumes you send user ID in route param
+  const user = await User.findById(userId);
   if (!user) {
     return res.status(404).json({ message: "No user with this id" });
   }
-
 
   const newNote = {
     title,
