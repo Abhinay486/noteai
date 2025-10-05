@@ -676,9 +676,7 @@ const Home = () => {
                     : 'opacity-0 translate-y-8'
                   }
                 `}
-                style={{
-                  transitionDelay: isVisible ? `${index * 100}ms` : '0ms'
-                }}
+                
                 onClick={() => viewNote(note)}
               >
                 <div className="px-6 py-5 bg-gradient-to-r from-white to-gray-50 group-hover:from-blue-50 group-hover:to-indigo-50 transition-all duration-300">
